@@ -485,6 +485,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startIn) startIn.addEventListener('change', () => chartView.render());
     if (endIn) endIn.addEventListener('change', () => chartView.render());
 
+    // Task Color Picker
+    const colorPicker = document.getElementById('task-color-picker');
+    const colorPreviewDot = document.getElementById('color-preview-dot');
+
+    if (colorPicker) {
+        // Load saved color if any
+        const savedColor = localStorage.getItem('gantt_task_color');
+        if (savedColor) {
+            colorPicker.value = savedColor;
+            document.documentElement.style.setProperty('--task-blue', savedColor);
+            if (colorPreviewDot) colorPreviewDot.style.backgroundColor = savedColor;
+        }
+
+        colorPicker.addEventListener('input', (e) => {
+            const newColor = e.target.value;
+            document.documentElement.style.setProperty('--task-blue', newColor);
+            if (colorPreviewDot) colorPreviewDot.style.backgroundColor = newColor;
+            localStorage.setItem('gantt_task_color', newColor);
+        });
+    }
+
     // Export Logic (Robust Full Gantt)
     window.exportChart = function () {
         // Check for library
@@ -505,7 +526,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const headerScroll = document.querySelector('.gantt-header-wrapper');
 
         // 2. Save State
-        const originalAppWidth = appContainer.style.width;
+        const originalAppWidth = appContainer.style.width || '';
+        const originalAppHeight = appContainer.style.height || '';
+        const originalSplitPaneWidth = splitPane.style.width || '';
+        const originalPaneRightWidth = paneRight.style.width || '';
         const originalOverflows = [
             appContainer.style.overflow,
             splitPane.style.overflow,
@@ -518,9 +542,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Expand Constraints
         // Calculate needed width: Left Pane (450) + Timeline Content
         const totalWidth = 450 + ganttBodyScroll.scrollWidth;
+        const totalHeight = Math.max(appContainer.scrollHeight, splitPane.scrollHeight + (headerScroll ? headerScroll.scrollHeight : 0) + 50);
 
         appContainer.style.width = `${totalWidth}px`;
-        appContainer.style.height = 'auto'; // ensure full height if needed
+        appContainer.style.height = `${totalHeight}px`; // ensure full height if needed
         appContainer.style.overflow = 'visible';
 
         splitPane.style.overflow = 'visible';
@@ -528,47 +553,57 @@ document.addEventListener('DOMContentLoaded', () => {
         ganttBodyScroll.style.overflow = 'visible';
         if (headerScroll) headerScroll.style.overflow = 'visible';
 
+        splitPane.style.width = `${totalWidth}px`;
+        paneRight.style.width = `${ganttBodyScroll.scrollWidth}px`;
+
         // 4. Capture
-        html2canvas(appContainer, {
-            width: totalWidth,
-            height: appContainer.scrollHeight,
-            scale: 2, // Retina quality
-            windowWidth: totalWidth, // Mock window size
-            scrollX: 0,
-            scrollY: 0
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'gantt-chart-full.png';
-            link.href = canvas.toDataURL();
-            link.click();
+        setTimeout(() => {
+            html2canvas(appContainer, {
+                width: totalWidth,
+                height: totalHeight,
+                scale: 2, // Retina quality
+                windowWidth: totalWidth, // Mock window size
+                windowHeight: totalHeight,
+                scrollX: 0,
+                scrollY: 0
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'gantt-chart-full.png';
+                link.href = canvas.toDataURL();
+                link.click();
 
-            // 5. Restore
-            appContainer.style.width = originalAppWidth;
-            appContainer.style.height = '';
-            appContainer.style.overflow = originalOverflows[0];
-            splitPane.style.overflow = originalOverflows[1];
-            paneRight.style.overflow = originalOverflows[2];
-            ganttBodyScroll.style.overflow = originalOverflows[3];
-            if (headerScroll) headerScroll.style.overflow = originalOverflows[4];
+                // 5. Restore
+                appContainer.style.width = originalAppWidth;
+                appContainer.style.height = originalAppHeight;
+                splitPane.style.width = originalSplitPaneWidth;
+                paneRight.style.width = originalPaneRightWidth;
+                appContainer.style.overflow = originalOverflows[0];
+                splitPane.style.overflow = originalOverflows[1];
+                paneRight.style.overflow = originalOverflows[2];
+                ganttBodyScroll.style.overflow = originalOverflows[3];
+                if (headerScroll) headerScroll.style.overflow = originalOverflows[4];
 
-            ganttBodyScroll.scrollLeft = originalScroll; // Restore scroll pos
+                ganttBodyScroll.scrollLeft = originalScroll; // Restore scroll pos
 
-            btn.innerText = oldText;
+                btn.innerText = oldText;
 
-        }).catch(err => {
-            console.error(err);
-            alert("Export failed: " + err.message);
+            }).catch(err => {
+                console.error(err);
+                alert("Export failed: " + err.message);
 
-            // Restore failure state
-            appContainer.style.width = originalAppWidth;
-            appContainer.style.height = '';
-            appContainer.style.overflow = originalOverflows[0];
-            splitPane.style.overflow = originalOverflows[1];
-            paneRight.style.overflow = originalOverflows[2];
-            ganttBodyScroll.style.overflow = originalOverflows[3];
-            if (headerScroll) headerScroll.style.overflow = originalOverflows[4];
+                // Restore failure state
+                appContainer.style.width = originalAppWidth;
+                appContainer.style.height = originalAppHeight;
+                splitPane.style.width = originalSplitPaneWidth;
+                paneRight.style.width = originalPaneRightWidth;
+                appContainer.style.overflow = originalOverflows[0];
+                splitPane.style.overflow = originalOverflows[1];
+                paneRight.style.overflow = originalOverflows[2];
+                ganttBodyScroll.style.overflow = originalOverflows[3];
+                if (headerScroll) headerScroll.style.overflow = originalOverflows[4];
 
-            btn.innerText = oldText;
-        });
+                btn.innerText = oldText;
+            });
+        }, 300); // Small delay to allow browser to reflow layout
     }
 });
