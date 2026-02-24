@@ -30,6 +30,14 @@
                     <input type="color" id="task-color-picker" value="#0052cc" title="Choose Task Color"
                         style="opacity: 0; position: absolute; pointer-events: none; width: 0; height: 0;">
                 </div>
+                <!-- View Modes -->
+                <div class="view-modes" style="display: flex; gap: 5px; margin-right: 15px;">
+                    <button onclick="setViewMode('days')" class="btn-secondary" id="btn-view-days"
+                        style="background-color: var(--primary-color); color: white; border-color: var(--primary-color);">Days</button>
+                    <button onclick="setViewMode('weeks')" class="btn-secondary" id="btn-view-weeks">Weeks</button>
+                    <button onclick="setViewMode('months')" class="btn-secondary" id="btn-view-months">Months</button>
+                </div>
+
                 <button onclick="loadDemoData()" class="btn-secondary">Load Demo</button>
                 <button onclick="exportChart()" class="btn-secondary">Download Export</button>
                 <button onclick="addNewTask()" class="btn-primary">+ Add Task</button>

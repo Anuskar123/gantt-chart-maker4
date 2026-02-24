@@ -101,16 +101,20 @@ export class ChartView {
         e.preventDefault();
         this.draggingTask = task;
         this.startX = e.clientX;
-        this.initialLeft = parseInt(e.target.style.left || 0);
 
-        // Bind functions to preserve 'this'
+        // Find the actual task-bar element, in case a child was clicked
+        const bar = e.target.closest('.task-bar');
+        if (!bar) return;
+
+        this.initialLeft = parseInt(bar.style.left || 0);
+
         this.boundHandleDrag = this.handleDrag.bind(this);
         this.boundHandleDragEnd = this.handleDragEnd.bind(this);
 
         document.addEventListener('mousemove', this.boundHandleDrag);
         document.addEventListener('mouseup', this.boundHandleDragEnd);
 
-        e.target.style.cursor = 'grabbing';
+        bar.style.cursor = 'grabbing';
     }
 
     handleDrag(e) {

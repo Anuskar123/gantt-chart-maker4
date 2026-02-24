@@ -161,6 +161,15 @@ class ChartView {
     }
 
     render() {
+        // Set dayWidth based on active view mode
+        if (window.currentViewMode === 'months') {
+            this.dayWidth = 4;
+        } else if (window.currentViewMode === 'weeks') {
+            this.dayWidth = 12;
+        } else {
+            this.dayWidth = 40; // days
+        }
+
         const tasks = this.model.getTasks();
 
         // Check for Manual Overrides from Inputs
@@ -226,17 +235,19 @@ class ChartView {
         let weekWidth = 0;
 
         for (let i = 0; i < this.totalDays; i++) {
-            // Day Row (1, 2, 3...)
-            const dayCell = document.createElement('div');
-            dayCell.className = 'header-cell';
-            dayCell.style.width = `${this.dayWidth}px`;
-            dayCell.textContent = currentDate.getDate();
+            // Day Logic
+            if (window.currentViewMode === 'days') {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'header-cell';
+                dayCell.style.width = `${this.dayWidth}px`;
+                dayCell.textContent = currentDate.getDate();
 
-            const dayOfWeek = currentDate.getDay();
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                dayCell.style.backgroundColor = '#ebecf0';
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    dayCell.style.backgroundColor = '#ebecf0';
+                }
+                dayRow.appendChild(dayCell);
             }
-            dayRow.appendChild(dayCell);
 
             // Month Logic
             const monthName = currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -251,7 +262,6 @@ class ChartView {
             monthWidth += this.dayWidth;
 
             // Week Logic (Week 1, Week 2...) relative to month
-            // Week 1 = Days 1-7, Week 2 = 8-14, etc.
             const dateNum = currentDate.getDate();
             const weekNum = Math.ceil(dateNum / 7);
             const weekLabel = `Week ${weekNum}`;
@@ -259,8 +269,6 @@ class ChartView {
 
             if (uniqueWeekKey !== currentWeekKey) {
                 if (currentWeekKey !== null) {
-                    // Extract "Week X" from key
-                    // Just show "Week X", not Month-Week X
                     const labelToShow = currentWeekKey.split('-')[1];
                     weeks.push({ name: labelToShow, width: weekWidth });
                 }
@@ -288,19 +296,37 @@ class ChartView {
         });
 
         // Render Week Row
-        weeks.forEach(w => {
-            const cell = document.createElement('div');
-            cell.className = 'header-cell';
-            cell.style.width = `${w.width}px`;
-            cell.textContent = w.name;
-            // distinct style for week
-            cell.style.fontSize = '0.70rem'; // slightly smaller
-            weekRow.appendChild(cell);
-        });
+        if (window.currentViewMode === 'days' || window.currentViewMode === 'weeks' || window.currentViewMode === 'months') {
+            weeks.forEach(w => {
+                const cell = document.createElement('div');
+                cell.className = 'header-cell';
+                cell.style.width = `${w.width}px`;
+                cell.textContent = w.name;
+                // distinct style for week
+                cell.style.fontSize = '0.70rem'; // slightly smaller
+                // Hide week text if it's too cramped in month view
+                if (window.currentViewMode === 'months' && w.width < 30) {
+                    cell.textContent = ''; // Just show lines, not text
+                }
+                weekRow.appendChild(cell);
+            });
+        }
+
 
         this.chartHeader.appendChild(monthRow);
-        this.chartHeader.appendChild(weekRow);
-        this.chartHeader.appendChild(dayRow);
+
+        // Append rows conditionally based on mode
+        if (window.currentViewMode === 'months') {
+            this.chartHeader.appendChild(weekRow);
+            // Hide day row entirely
+        } else if (window.currentViewMode === 'weeks') {
+            this.chartHeader.appendChild(weekRow);
+            // Hide day row entirely
+        } else {
+            // Days view
+            this.chartHeader.appendChild(weekRow);
+            this.chartHeader.appendChild(dayRow);
+        }
     }
 
     renderGrid(tasks) {
@@ -406,7 +432,12 @@ class ChartView {
         e.preventDefault();
         this.draggingTask = task;
         this.startX = e.clientX;
-        this.initialLeft = parseInt(e.target.style.left || 0);
+
+        // Find the actual task-bar element, in case a child was clicked
+        const bar = e.target.closest('.task-bar');
+        if (!bar) return;
+
+        this.initialLeft = parseInt(bar.style.left || 0);
 
         this.boundHandleDrag = this.handleDrag.bind(this);
         this.boundHandleDragEnd = this.handleDragEnd.bind(this);
@@ -414,7 +445,7 @@ class ChartView {
         document.addEventListener('mousemove', this.boundHandleDrag);
         document.addEventListener('mouseup', this.boundHandleDragEnd);
 
-        e.target.style.cursor = 'grabbing';
+        bar.style.cursor = 'grabbing';
     }
 
     handleDrag(e) {
@@ -460,6 +491,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const taskModel = new TaskModel();
     const chartView = new ChartView(taskModel);
+
+    // View Mode Management
+    window.currentViewMode = 'days';
+    window.setViewMode = function (mode) {
+        window.currentViewMode = mode;
+
+        // Update button active states
+        const btnDays = document.getElementById('btn-view-days');
+        const btnWeeks = document.getElementById('btn-view-weeks');
+        const btnMonths = document.getElementById('btn-view-months');
+
+        if (btnDays) {
+            btnDays.style.backgroundColor = mode === 'days' ? 'var(--primary-color)' : '';
+            btnDays.style.color = mode === 'days' ? 'white' : '';
+            btnDays.style.borderColor = mode === 'days' ? 'var(--primary-color)' : '';
+        }
+        if (btnWeeks) {
+            btnWeeks.style.backgroundColor = mode === 'weeks' ? 'var(--primary-color)' : '';
+            btnWeeks.style.color = mode === 'weeks' ? 'white' : '';
+            btnWeeks.style.borderColor = mode === 'weeks' ? 'var(--primary-color)' : '';
+        }
+        if (btnMonths) {
+            btnMonths.style.backgroundColor = mode === 'months' ? 'var(--primary-color)' : '';
+            btnMonths.style.color = mode === 'months' ? 'white' : '';
+            btnMonths.style.borderColor = mode === 'months' ? 'var(--primary-color)' : '';
+        }
+
+        chartView.render();
+    };
 
     chartView.render();
 
@@ -520,10 +580,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Elements
         const appContainer = document.querySelector('.app-container');
+        const appToolbar = document.querySelector('.app-toolbar');
         const splitPane = document.querySelector('.split-pane');
         const paneRight = document.getElementById('pane-right');
         const ganttBodyScroll = document.getElementById('gantt-body-scroll');
         const headerScroll = document.querySelector('.gantt-header-wrapper');
+
+        // Hide toolbar to clean up exported image
+        const originalToolbarDisplay = appToolbar ? appToolbar.style.display : '';
+        if (appToolbar) appToolbar.style.display = 'none';
 
         // 2. Save State
         const originalAppWidth = appContainer.style.width || '';
@@ -561,11 +626,12 @@ document.addEventListener('DOMContentLoaded', () => {
             html2canvas(appContainer, {
                 width: totalWidth,
                 height: totalHeight,
-                scale: 2, // Retina quality
+                scale: 2.5, // Crisp, high quality
                 windowWidth: totalWidth, // Mock window size
                 windowHeight: totalHeight,
                 scrollX: 0,
-                scrollY: 0
+                scrollY: 0,
+                backgroundColor: '#ffffff' // Ensure white background, not transparent
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'gantt-chart-full.png';
@@ -582,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 paneRight.style.overflow = originalOverflows[2];
                 ganttBodyScroll.style.overflow = originalOverflows[3];
                 if (headerScroll) headerScroll.style.overflow = originalOverflows[4];
+                if (appToolbar) appToolbar.style.display = originalToolbarDisplay;
 
                 ganttBodyScroll.scrollLeft = originalScroll; // Restore scroll pos
 
@@ -601,6 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 paneRight.style.overflow = originalOverflows[2];
                 ganttBodyScroll.style.overflow = originalOverflows[3];
                 if (headerScroll) headerScroll.style.overflow = originalOverflows[4];
+                if (appToolbar) appToolbar.style.display = originalToolbarDisplay;
 
                 btn.innerText = oldText;
             });
