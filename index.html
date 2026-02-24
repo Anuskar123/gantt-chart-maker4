@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Gantt Chart Maker</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/chart.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header / Toolbar -->
+        <header class="app-toolbar">
+            <div class="logo">Gantt.io</div>
+            <div class="toolbar-actions">
+                <button onclick="loadDemoData()" class="btn-secondary">Load Demo</button>
+                <button onclick="exportChart()" class="btn-secondary">Download Export</button>
+                <button onclick="addNewTask()" class="btn-primary">+ Add Task</button>
+                <div class="view-controls" style="display: flex; gap: 5px; align-items: center; margin-left: 10px;">
+                    <label style="font-size: 0.8rem; color: var(--text-secondary);">Range:</label>
+                    <input type="date" id="view-start" title="View Start Date" style="width: auto; padding: 5px;">
+                    <span style="color: var(--text-secondary);">-</span>
+                    <input type="date" id="view-end" title="View End Date" style="width: auto; padding: 5px;">
+                </div>
+            </div>
+        </header>
+
+        <!-- Split Pane Content -->
+        <div class="split-pane">
+            <!-- Left Pane: Grid / Spreadsheet -->
+            <div class="pane-left" id="pane-left">
+                <div class="grid-header">
+                    <div class="grid-cell c-id">#</div>
+                    <div class="grid-cell c-name">Task Name</div>
+                    <div class="grid-cell c-start">Start</div>
+                    <div class="grid-cell c-dur">Dur.</div>
+                    <div class="grid-cell c-dep">Dep.</div>
+                </div>
+                <div class="grid-body" id="grid-body">
+                    <!-- Rows injected via JS -->
+                </div>
+            </div>
+
+            <!-- Resizer Handle -->
+            <div class="resizer" id="resizer"></div>
+
+            <!-- Right Pane: Timeline -->
+            <div class="pane-right" id="pane-right">
+                <div class="gantt-header-wrapper" id="gantt-header-wrapper">
+                    <div class="gantt-header" id="gantt-header">
+                        <!-- Date headers injected here -->
+                    </div>
+                </div>
+                <div class="gantt-body-scroll-container" id="gantt-body-scroll">
+                    <div class="gantt-body" id="gantt-body">
+                        <!-- Bars injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="scripts/bundle.js"></script>
+</body>
+
+</html>

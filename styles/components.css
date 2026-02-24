@@ -1,0 +1,23 @@
+/* UI Components */
+/* Keeping this separate for future modal/tooltip styles */
+
+.methodology-selector {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.task-list-preview ul {
+    list-style: none;
+    margin-top: 10px;
+}
+
+.task-list-preview li {
+    padding: 10px;
+    background-color: var(--bg-card);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+}

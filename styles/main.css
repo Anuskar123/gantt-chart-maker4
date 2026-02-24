@@ -1,0 +1,294 @@
+:root {
+    /* Color Palette - Light Mode */
+    --bg-app: #ffffff;
+    --bg-sidebar: #f4f5f7;
+    --bg-card: #ffffff;
+    --text-primary: #172b4d;
+    --text-secondary: #5e6c84;
+    --accent-color: #0052cc;
+    --accent-hover: #0747a6;
+    --border-color: #dfe1e6;
+    --grid-line: #ebecf0;
+
+    /* Task Colors */
+    --task-blue: #0052cc;
+    --task-green: #00875a;
+    --task-purple: #5243aa;
+    --task-orange: #ff991f;
+
+    /* Dimensions */
+    --header-height: 50px;
+    --row-height: 48px;
+    --day-width: 40px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Layout */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: transform 0.3s ease;
+}
+
+/* Rotation Feature */
+body.rotated .app-container {
+    transform: rotate(90deg);
+    transform-origin: center center;
+    width: 100vh;
+    height: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    left: calc(50vw - 50vh);
+    top: calc(50vh - 50vw);
+}
+
+.app-toolbar {
+    height: var(--header-height);
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    justify-content: space-between;
+}
+
+.logo {
+    font-weight: 700;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+}
+
+.split-pane {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Left Pane: Grid */
+.pane-left {
+    width: 450px;
+    /* Initial width */
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    background: white;
+}
+
+.grid-header {
+    height: 75px;
+    /* Matches 3-tier timeline header now */
+    display: flex;
+    background: var(--bg-sidebar);
+    border-bottom: 2px solid var(--border-color);
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    align-items: flex-end;
+    /* Align titles to bottom */
+}
+
+.grid-cell {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border-color);
+    overflow: hidden;
+    white-space: nowrap;
+    height: 100%;
+}
+
+/* Column Widths */
+.c-id {
+    width: 40px;
+    justify-content: center;
+}
+
+.c-name {
+    flex: 1;
+    min-width: 150px;
+}
+
+.c-start {
+    width: 100px;
+}
+
+.c-dur {
+    width: 60px;
+    justify-content: center;
+}
+
+.c-dep {
+    width: 60px;
+    justify-content: center;
+}
+
+.grid-body {
+    flex: 1;
+    overflow-y: hidden;
+    /* Scroll controlled by JS sync */
+    overflow-x: auto;
+}
+
+.grid-row {
+    height: var(--row-height);
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.grid-row .grid-cell {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    padding: 0 10px;
+}
+
+.grid-row .grid-cell:focus {
+    outline: 2px solid var(--accent-color);
+    background: #eef2fa;
+}
+
+/* Right Pane: Chart */
+.pane-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Internal scrolling */
+}
+
+/* Sync Layout for Chart */
+.gantt-header-wrapper {
+    height: 75px;
+    /* 3 rows of 25px */
+    overflow: hidden;
+    /* Syncs with body X scroll */
+    background: var(--bg-sidebar);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.gantt-header {
+    height: 100%;
+    position: relative;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    /* Force Stack */
+}
+
+.header-row {
+    height: 25px !important;
+    /* Force Height */
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    box-sizing: border-box;
+    width: 100%;
+    flex-shrink: 0;
+    /* Don't squash */
+}
+
+.header-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    /* Darker text */
+    background: #f4f5f7;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.gantt-body-scroll-container {
+    flex: 1;
+    overflow: auto;
+    /* Main scroll area */
+    position: relative;
+}
+
+.gantt-body {
+    position: relative;
+    background-size: var(--day-width) var(--day-width);
+    background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px);
+}
+
+/* Common UI Elements */
+button {
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+    margin-right: 8px;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-sidebar);
+}
+
+.task-bar {
+    position: absolute;
+    height: 24px;
+    top: 12px;
+    background-color: var(--task-blue);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 0.75rem;
+    color: white;
+    cursor: grab;
+    overflow: hidden;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.task-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    z-index: 0;
+}
+
+.task-label {
+    position: relative;
+    z-index: 1;
+}

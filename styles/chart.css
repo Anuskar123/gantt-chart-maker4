@@ -1,0 +1,77 @@
+/* Gantt Chart Specific Styles */
+
+.gantt-header {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bg-app);
+    border-bottom: 1px solid var(--border-color);
+    height: 40px;
+}
+
+.gantt-date-cell {
+    min-width: var(--day-width);
+    border-right: 1px solid var(--grid-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.gantt-body {
+    position: relative;
+    /* Grid lines will be drawn slightly differently or using background-image for performance */
+    background-size: var(--day-width) var(--day-width);
+    background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px);
+}
+
+.gantt-row {
+    height: var(--row-height);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.task-bar {
+    position: absolute;
+    height: 24px;
+    top: 12px;
+    /* (Row Height 48 - Bar Height 24) / 2 */
+    background-color: var(--task-blue);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 0.75rem;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.task-bar:active {
+    cursor: grabbing;
+}
+
+.task-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    z-index: 0;
+}
+
+.task-label {
+    position: relative;
+    z-index: 1;
+}
+
+/* Dependencies (Lines) */
+.dependency-line {
+    stroke: var(--text-secondary);
+    stroke-width: 2;
+    fill: none;
+}
