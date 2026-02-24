@@ -170,6 +170,9 @@ class ChartView {
             this.dayWidth = 40; // days
         }
 
+        // Update CSS variable so the background grid pattern scales correctly
+        document.documentElement.style.setProperty('--day-width', `${this.dayWidth}px`);
+
         const tasks = this.model.getTasks();
 
         // Check for Manual Overrides from Inputs
@@ -218,7 +221,7 @@ class ChartView {
 
         let currentDate = new Date(this.startDate);
         const totalWidth = this.totalDays * this.dayWidth;
-        this.chartHeader.style.width = `${totalWidth}px`;
+        this.chartHeader.style.width = `max(100%, ${totalWidth}px)`;
 
         // Create Rows
         const monthRow = document.createElement('div'); monthRow.className = 'header-row';
@@ -394,7 +397,7 @@ class ChartView {
     renderTimeline(tasks) {
         if (!this.chartBody) return;
         this.chartBody.innerHTML = '';
-        this.chartBody.style.width = `${this.totalDays * this.dayWidth}px`;
+        this.chartBody.style.width = `max(100%, ${this.totalDays * this.dayWidth}px)`;
 
         tasks.forEach(task => {
             const row = document.createElement('div');
